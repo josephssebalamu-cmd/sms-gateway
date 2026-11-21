@@ -1,4 +1,6 @@
 import com.android.build.gradle.LibraryExtension
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 allprojects {
     repositories {
@@ -15,8 +17,7 @@ subprojects {
     project.layout.buildDirectory.value(newSubprojectBuildDir)
 }
 
-// ✅ Step 1: Inject namespaces into plugins that lack them
-// This MUST run before evaluationDependsOn(":app") below
+// 1. Inject namespace for plugins that lack one (fixes previous telephony error)
 subprojects {
     afterEvaluate {
         extensions.findByType<LibraryExtension>()?.apply {
@@ -27,7 +28,20 @@ subprojects {
     }
 }
 
-// ✅ Step 2: Evaluate the app project (now safe because namespaces are set)
+// 2. Force ALL subprojects (plugins) to use JVM 11 for Java & Kotlin
+subprojects {
+    tasks.withType<JavaCompile>().configureEach {
+        sourceCompatibility = "11"
+        targetCompatibility = "11"
+    }
+    tasks.withType<KotlinCompile>().configureEach {
+        compilerOptions {
+            jvmTarget.set(JvmTarget.JVM_11)
+        }
+    }
+}
+
+// 3. Evaluate app project last
 subprojects {
     project.evaluationDependsOn(":app")
 }

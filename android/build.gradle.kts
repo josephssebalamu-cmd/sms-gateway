@@ -15,11 +15,8 @@ subprojects {
     project.layout.buildDirectory.value(newSubprojectBuildDir)
 }
 
-subprojects {
-    project.evaluationDependsOn(":app")
-}
-
-// 👇 ADD THIS BLOCK TO FIX THE MISSING NAMESPACE 👇
+// ✅ Step 1: Inject namespaces into plugins that lack them
+// This MUST run before evaluationDependsOn(":app") below
 subprojects {
     afterEvaluate {
         extensions.findByType<LibraryExtension>()?.apply {
@@ -29,7 +26,11 @@ subprojects {
         }
     }
 }
-// 👆 END OF FIX 👆
+
+// ✅ Step 2: Evaluate the app project (now safe because namespaces are set)
+subprojects {
+    project.evaluationDependsOn(":app")
+}
 
 tasks.register<Delete>("clean") {
     delete(rootProject.layout.buildDirectory)

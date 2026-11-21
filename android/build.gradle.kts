@@ -1,3 +1,4 @@
+import com.android.build.gradle.BaseExtension
 import com.android.build.gradle.LibraryExtension
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
@@ -29,14 +30,28 @@ subprojects {
 }
 
 // 2. Force ALL subprojects (plugins) to use JVM 11 for Java & Kotlin
+// This must run in afterEvaluate to override the plugin's own settings.
 subprojects {
-    tasks.withType<JavaCompile>().configureEach {
-        sourceCompatibility = "11"
-        targetCompatibility = "11"
-    }
-    tasks.withType<KotlinCompile>().configureEach {
-        compilerOptions {
-            jvmTarget.set(JvmTarget.JVM_11)
+    afterEvaluate {
+        // Force Android plugins to use JVM 11
+        if (plugins.hasPlugin("com.android.library") || plugins.hasPlugin("com.android.application")) {
+            configure<BaseExtension> {
+                compileOptions {
+                    sourceCompatibility = JavaVersion.VERSION_11
+                    targetCompatibility = JavaVersion.VERSION_11
+                }
+            }
+        }
+        // Force Kotlin compilation to use JVM 11
+        tasks.withType<KotlinCompile>().configureEach {
+            compilerOptions {
+                jvmTarget.set(JvmTarget.JVM_11)
+            }
+        }
+        // Force Java compilation to use JVM 11 (for non-Android subprojects)
+        tasks.withType<JavaCompile>().configureEach {
+            sourceCompatibility = "11"
+            targetCompatibility = "11"
         }
     }
 }

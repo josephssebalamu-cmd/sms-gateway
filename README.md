@@ -1,16 +1,22 @@
-# gateway
+# sms-gateway
 
-A new Flutter project.
+my vivo sms gateway
 
-## Getting Started
+This Flutter Android app receives product commands over SMS and processes
+outbound replies through Supabase. The app UI is for gateway status, messages,
+and settings; product catalog management is performed by SMS.
 
-This project is a starting point for a Flutter application.
+## GitHub Actions
 
-A few resources to get you started if this is your first Flutter project:
+The `Build split-per-ABI release APK` workflow runs on pushes to `main` and can
+also be started manually. Configure these repository Actions secrets before
+building:
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+- `SUPABASE_URL`
+- `SUPABASE_SERVICE_ROLE_KEY`
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+The release signing secrets are optional for an internal build. Without them,
+the APK is signed with the Android debug key and is not suitable for publishing.
+
+The service-role key bypasses Row Level Security and is embedded in the APK.
+Do not distribute such a build publicly.

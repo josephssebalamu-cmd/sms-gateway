@@ -2,7 +2,8 @@ import java.util.Properties
 
 plugins {
     id("com.android.application")
-    id("kotlin-android")
+    // Remove the old `kotlin-android` plugin; AGP 9 uses built-in Kotlin
+    // id("kotlin-android") 
     // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
     id("dev.flutter.flutter-gradle-plugin")
 }
@@ -15,10 +16,6 @@ android {
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
-    }
-
-    kotlinOptions {
-        jvmTarget = JavaVersion.VERSION_11.toString()
     }
 
     val keystoreProperties = Properties()
@@ -57,6 +54,13 @@ android {
                 signingConfigs.getByName("debug")
             }
         }
+    }
+}
+
+// New Kotlin DSL block (replaces the deprecated `kotlinOptions` inside `android {}`)
+kotlin {
+    compilerOptions {
+        jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_11)
     }
 }
 

@@ -1,3 +1,4 @@
+# yaml-language-server: $schema=https://json.schemastore.org/github-workflow.json
 name: Build split-per-ABI release APK
 
 "on":
@@ -10,12 +11,12 @@ jobs:
   build:
     runs-on: ubuntu-latest
     env:
-      KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
-      KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
-      KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
-      KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
-      SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
-      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+      KEYSTORE_BASE64: "${{ secrets.KEYSTORE_BASE64 }}"
+      KEYSTORE_PASSWORD: "${{ secrets.KEYSTORE_PASSWORD }}"
+      KEY_ALIAS: "${{ secrets.KEY_ALIAS }}"
+      KEY_PASSWORD: "${{ secrets.KEY_PASSWORD }}"
+      SUPABASE_URL: "${{ secrets.SUPABASE_URL }}"
+      SUPABASE_SERVICE_ROLE_KEY: "${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}"
 
     steps:
       - name: Check out repository
@@ -42,27 +43,24 @@ jobs:
           fi
 
       - name: Decode release keystore
-        if: ${{ env.KEYSTORE_BASE64 != '' }}
+        if: env.KEYSTORE_BASE64 != ''
         shell: bash
         run: printf '%s' "$KEYSTORE_BASE64" | base64 --decode > android/app/keystore.jks
 
       - name: Write Android release key properties
-        if: ${{ env.KEYSTORE_PASSWORD != '' && env.KEY_ALIAS != '' && env.KEY_PASSWORD != '' }}
+        if: env.KEYSTORE_PASSWORD != ''
         shell: bash
         run: |
-          cat > android/key.properties <<EOF
-          storePassword=$KEYSTORE_PASSWORD
-          keyAlias=$KEY_ALIAS
-          keyPassword=$KEY_PASSWORD
-          EOF
+          echo "storePassword=$KEYSTORE_PASSWORD" > android/key.properties
+          echo "keyAlias=$KEY_ALIAS" >> android/key.properties
+          echo "keyPassword=$KEY_PASSWORD" >> android/key.properties
+          echo "storeFile=keystore.jks" >> android/key.properties
 
       - name: Create local environment asset
         shell: bash
         run: |
-          cat > .env <<EOF
-          SUPABASE_URL=$SUPABASE_URL
-          SUPABASE_SERVICE_ROLE_KEY=$SUPABASE_SERVICE_ROLE_KEY
-          EOF
+          echo "SUPABASE_URL=$SUPABASE_URL" > .env
+          echo "SUPABASE_SERVICE_ROLE_KEY=$SUPABASE_SERVICE_ROLE_KEY" >> .env
 
       - name: Install dependencies
         run: flutter pub get
